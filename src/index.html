@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic To-Do App</title>
+    <!-- Google Fonts for a nicer look -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset & Body Styling */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0); /* Nice gradient background */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top, not center vertically */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Main Container */
+        .todo-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            margin-top: 50px; /* Push it down a bit from the top */
+        }
+
+        h1 {
+            color: #2193b0;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        #taskInput {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #taskInput:focus {
+            border-color: #2193b0;
+            box-shadow: 0 0 0 3px rgba(33, 147, 176, 0.2);
+        }
+
+        #addTaskBtn {
+            padding: 12px 20px;
+            background-color: #2193b0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+
+        #addTaskBtn:hover {
+            background-color: #1a7a90;
+            transform: translateY(-2px);
+        }
+
+        #addTaskBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Task List */
+        #taskList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer; /* Indicate clickable */
+        }
+
+        .task-item:hover {
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .task-item.completed {
+            background-color: #e0ffe0; /* Light green for completed */
+            border-color: #c0f0c0;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            font-size: 1.1em;
+            word-break: break-word; /* Handle long words */
+            margin-right: 10px; /* Space between text and button */
+        }
+
+        .delete-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 10px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 10px; /* Ensure space from text */
+        }
+
+        .delete-btn:hover {
+            background-color: #e63946;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Empty Message */
+        .empty-message {
+            color: #888;
+            font-style: italic;
+            margin-top: 20px;
+            font-size: 0.95em;
+        }
+
+        /* Hide empty message when tasks are present */
+        #taskList:not(:empty) + #emptyMessage {
+            display: none;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .todo-container {
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            #addTaskBtn {
+                width: 100%;
+            }
+
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 12px;
+            }
+
+            .task-text {
+                margin-bottom: 8px;
+                margin-right: 0;
+            }
+
+            .delete-btn {
+                align-self: flex-end; /* Align delete button to the right */
+                width: auto; /* Allow button to size naturally */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-container">
+        <h1>My To-Do List</h1>
+
+        <div class="input-section">
+            <input type="text" id="taskInput" placeholder="Add a new task...">
+            <button id="addTaskBtn">Add Task</button>
+        </div>
+
+        <ul id="taskList">
+            <!-- To-Do items will be added here by JavaScript -->
+        </ul>
+
+        <p class="empty-message" id="emptyMessage">No tasks yet! Add some above.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('taskInput');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const taskList = document.getElementById('taskList');
+            const emptyMessage = document.getElementById('emptyMessage');
+
+            // --- Helper Functions ---
+
+            /**
+             * Saves the current tasks to localStorage.
+             */
+            function saveTasks() {
+                const tasks = [];
+                taskList.querySelectorAll('.task-item').forEach(item => {
+                    tasks.push({
+                        text: item.querySelector('.task-text').textContent,
+                        completed: item.classList.contains('completed')
+                    });
+                });
+                localStorage.setItem('todoTasks', JSON.stringify(tasks));
+                updateEmptyMessageVisibility();
+            }
+
+            /**
+             * Loads tasks from localStorage and renders them.
+             */
+            function loadTasks() {
+                const tasks = JSON.parse(localStorage.getItem('todoTasks') || '[]');
+                tasks.forEach(task => {
+                    createTaskElement(task.text, task.completed);
+                });
+                updateEmptyMessageVisibility();
+            }
+
+            /**
+             * Updates the visibility of the "No tasks yet" message.
+             */
+            function updateEmptyMessageVisibility() {
+                if (taskList.children.length === 0) {
+                    emptyMessage.style.display = 'block';
+                } else {
+                    emptyMessage.style.display = 'none';
+                }
+            }
+
+            /**
+             * Creates and appends a new task element to the list.
+             * @param {string} taskText - The text content of the task.
+             * @param {boolean} isCompleted - Whether the task is initially completed.
+             */
+            function createTaskElement(taskText, isCompleted = false) {
+                const listItem = document.createElement('li');
+                listItem.classList.add('task-item');
+                if (isCompleted) {
+                    listItem.classList.add('completed');
+                }
+
+                const taskSpan = document.createElement('span');
+                taskSpan.classList.add('task-text');
+                taskSpan.textContent = taskText;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.textContent = 'Delete';
+
+                listItem.appendChild(taskSpan);
+                listItem.appendChild(deleteBtn);
+                taskList.appendChild(listItem);
+            }
+
+            // --- Event Handlers ---
+
+            /**
+             * Handles adding a new task.
+             */
+            function handleAddTask() {
+                const taskText = taskInput.value.trim();
+
+                if (taskText === '') {
+                    alert('Please enter a task!');
+                    return;
+                }
+
+                createTaskElement(taskText);
+                taskInput.value = ''; // Clear input
+                taskInput.focus();    // Keep focus on input
+                saveTasks();          // Save tasks to localStorage
+            }
+
+            /**
+             * Handles clicks on task items (toggle complete) or delete buttons.
+             * Uses event delegation for efficiency.
+             * @param {Event} event - The click event.
+             */
+            function handleTaskActions(event) {
+                const target = event.target;
+                const listItem = target.closest('.task-item'); // Find the parent li
+
+                if (!listItem) return; // Not a click on a task item or its children
+
+                if (target.classList.contains('delete-btn')) {
+                    // Delete task
+                    listItem.remove();
+                    saveTasks();
+                } else if (target.classList.contains('task-item') || target.classList.contains('task-text')) {
+                    // Toggle completed status
+                    listItem.classList.toggle('completed');
+                    saveTasks();
+                }
+            }
+
+            // --- Event Listeners ---
+
+            addTaskBtn.addEventListener('click', handleAddTask);
+
+            taskInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    handleAddTask();
+                }
+            });
+
+            taskList.addEventListener('click', handleTaskActions);
+
+            // --- Initial Load ---
+            loadTasks();
+        });
+    </script>
+</body>
+</html>
